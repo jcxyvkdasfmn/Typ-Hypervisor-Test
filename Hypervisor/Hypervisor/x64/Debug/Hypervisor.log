@@ -1,0 +1,17 @@
+﻿  Building 'Hypervisor' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
+  Stamping x64\Debug\Hypervisor.inf
+  Stamping [Version] section with DriverVer=01/13/2023,19.11.49.239
+  Driver.cpp
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Func_defs.h(30,7): error C2146: Syntaxfehler: Fehlendes ";" vor Bezeichner "InitEpt"
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Nt.h(842,16): error C2378: "PEPTP": Neudefinition; Symbol kann nicht mit typedef überladen werden
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Func_defs.h(30): message : Siehe Deklaration von "PEPTP"
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Driver.cpp(15,8): error C2146: Syntaxfehler: Fehlendes ";" vor Bezeichner "Status"
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Driver.cpp(15,8): error C2065: "Status": nichtdeklarierter Bezeichner
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Driver.cpp(23,3): error C2065: "Status": nichtdeklarierter Bezeichner
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Driver.cpp(23,12): error C3861: "InitEpt": Bezeichner wurde nicht gefunden.
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Driver.cpp(25,8): error C2065: "Status": nichtdeklarierter Bezeichner
+  Vmx.cpp
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Func_defs.h(30,7): error C2146: Syntaxfehler: Fehlendes ";" vor Bezeichner "InitEpt"
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Nt.h(842,16): error C2378: "PEPTP": Neudefinition; Symbol kann nicht mit typedef überladen werden
+C:\Users\Erik\Desktop\Hypervisor\Hypervisor\Hypervisor\Func_defs.h(30): message : Siehe Deklaration von "PEPTP"
+  Code wird generiert...
