@@ -1,5 +1,23 @@
 ﻿  Building 'Hypervisor' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
   Stamping x64\Debug\Hypervisor.inf
-  Stamping [Version] section with DriverVer=01/28/2023,15.40.8.925
-  Driver.cpp
-LINK : fatal error LNK1201: Fehler beim Schreiben in die Programmdatenbank "C:\Users\Erik\Desktop\Hv\Hypervisor\x64\Debug\Hypervisor.pdb"". Möglicherweise ist nicht genügend Festplattenspeicher verfügbar, ist der Pfad ungültig oder reichen die Zugriffsrechte nicht aus.
+  Stamping [Version] section with DriverVer=01/28/2023,19.32.27.691
+  VmmInitState.cpp
+  Hypervisor.vcxproj -> C:\Users\Erik\Desktop\Hv\Hypervisor\x64\Debug\Hypervisor.sys
+  Done Adding Additional Store
+  Successfully signed: C:\Users\Erik\Desktop\Hv\Hypervisor\x64\Debug\Hypervisor.sys
+  
+  Driver is 'Universal'.
+  .........................
+  Signability test complete.
+  
+  Errors:
+  None
+  
+  Warnings:
+  None
+  
+  Catalog generation complete.
+  C:\Users\Erik\Desktop\Hv\Hypervisor\x64\Debug\Hypervisor\hypervisor.cat
+  Done Adding Additional Store
+  Successfully signed: C:\Users\Erik\Desktop\Hv\Hypervisor\x64\Debug\Hypervisor\hypervisor.cat
+  

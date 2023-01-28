@@ -30,7 +30,7 @@ extern "C" UINT64 g_VirtualGuestMemoryAddress;
 #ifndef _VMMINITSTATE_H_
 #define _VMMINITSTATE_H_
 //-----------------------------------------------------------------------------//
-#define VMM_STACK_SIZE      0x8000
+#define VMM_STACK_SIZE      0x6000
 
 typedef struct _VMM_INIT_STATE
 {

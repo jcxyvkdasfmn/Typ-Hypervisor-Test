@@ -43,24 +43,6 @@ typedef struct _NT_KPROCESS
     UCHAR Data[1];
 }NT_KPROCESS, * PNT_KPROCESS;
 
-typedef union _IA32_VMX_BASIC_MSR
-{
-    ULONG64 All;
-    struct
-    {
-        ULONG32 RevisionIdentifier : 31;   // [0-30]
-        ULONG32 Reserved1 : 1;             // [31]
-        ULONG32 RegionSize : 12;           // [32-43]
-        ULONG32 RegionClear : 1;           // [44]
-        ULONG32 Reserved2 : 3;             // [45-47]
-        ULONG32 SupportedIA64 : 1;         // [48]
-        ULONG32 SupportedDualMoniter : 1;  // [49]
-        ULONG32 MemoryType : 4;            // [50-53]
-        ULONG32 VmExitReport : 1;          // [54]
-        ULONG32 VmxCapabilityHint : 1;     // [55]
-        ULONG32 Reserved3 : 8;             // [56-63]
-    } Fields;
-} IA32_VMX_BASIC_MSR, * PIA32_VMX_BASIC_MSR;
 
 
 
@@ -711,11 +693,16 @@ typedef union _MSR
 #define CPU_BASED_PAUSE_EXITING               0x40000000
 #define CPU_BASED_ACTIVATE_SECONDARY_CONTROLS 0x80000000
 
-#define CPU_BASED_CTL2_ENABLE_EPT         0x2
-#define CPU_BASED_CTL2_RDTSCP             0x8
-#define CPU_BASED_CTL2_ENABLE_VPID        0x20
-#define CPU_BASED_CTL2_UNRESTRICTED_GUEST 0x80
-#define CPU_BASED_CTL2_ENABLE_VMFUNC      0x2000
+// Secondary CPU-Based Controls
+#define CPU_BASED_CTL2_ENABLE_EPT						0x2
+#define CPU_BASED_CTL2_RDTSCP							0x8
+#define CPU_BASED_CTL2_ENABLE_VPID						0x20
+#define CPU_BASED_CTL2_UNRESTRICTED_GUEST				0x80
+#define CPU_BASED_CTL2_VIRTUAL_INTERRUPT_DELIVERY		0x200
+#define CPU_BASED_CTL2_ENABLE_INVPCID					0x1000
+#define CPU_BASED_CTL2_ENABLE_VMFUNC					0x2000
+#define CPU_BASED_CTL2_ENABLE_XSAVE_XRSTORS				0x100000
+
 
 // VM-exit Control Bits
 #define VM_EXIT_IA32E_MODE       0x00000200
@@ -948,129 +935,25 @@ typedef union _EPT_PTE
 #define ArBytesdef 2
 #define Basedef 3
 
-typedef union
+typedef union _IA32_VMX_BASIC_MSR
 {
+    ULONG64 All;
     struct
     {
-        /**
-         * @brief VMCS revision identifier used by the processor
-         *
-         * [Bits 30:0] 31-bit VMCS revision identifier used by the processor. Processors that use the same VMCS revision identifier
-         * use the same size for VMCS regions.
-         */
-        UINT64 VmcsRevisionId : 31;
-#define IA32_VMX_BASIC_VMCS_REVISION_ID_BIT                          0
-#define IA32_VMX_BASIC_VMCS_REVISION_ID_FLAG                         0x7FFFFFFF
-#define IA32_VMX_BASIC_VMCS_REVISION_ID_MASK                         0x7FFFFFFF
-#define IA32_VMX_BASIC_VMCS_REVISION_ID(_)                           (((_) >> 0) & 0x7FFFFFFF)
+        ULONG32 RevisionIdentifier : 31;  // [0-30]
+        ULONG32 Reserved1 : 1;            // [31]
+        ULONG32 RegionSize : 12;          // [32-43]
+        ULONG32 RegionClear : 1;          // [44]
+        ULONG32 Reserved2 : 3;            // [45-47]
+        ULONG32 SupportedIA64 : 1;        // [48]
+        ULONG32 SupportedDualMoniter : 1; // [49]
+        ULONG32 MemoryType : 4;           // [50-53]
+        ULONG32 VmExitReport : 1;         // [54]
+        ULONG32 VmxCapabilityHint : 1;    // [55]
+        ULONG32 Reserved3 : 8;            // [56-63]
+    } Fields;
+} IA32_VMX_BASIC_MSR, * PIA32_VMX_BASIC_MSR;
 
-        /**
-         * [Bit 31] Bit 31 is always 0.
-         */
-        UINT64 MustBeZero : 1;
-#define IA32_VMX_BASIC_MUST_BE_ZERO_BIT                              31
-#define IA32_VMX_BASIC_MUST_BE_ZERO_FLAG                             0x80000000
-#define IA32_VMX_BASIC_MUST_BE_ZERO_MASK                             0x01
-#define IA32_VMX_BASIC_MUST_BE_ZERO(_)                               (((_) >> 31) & 0x01)
-
-        /**
-         * @brief Size of the VMCS
-         *
-         * [Bits 44:32] Report the number of bytes that software should allocate for the VMXON region and any VMCS region. It is a
-         * value greater than 0 and at most 4096 (bit 44 is set if and only if bits 43:32 are clear).
-         */
-        UINT64 VmcsSizeInBytes : 13;
-#define IA32_VMX_BASIC_VMCS_SIZE_IN_BYTES_BIT                        32
-#define IA32_VMX_BASIC_VMCS_SIZE_IN_BYTES_FLAG                       0x1FFF00000000
-#define IA32_VMX_BASIC_VMCS_SIZE_IN_BYTES_MASK                       0x1FFF
-#define IA32_VMX_BASIC_VMCS_SIZE_IN_BYTES(_)                         (((_) >> 32) & 0x1FFF)
-        UINT64 Reserved1 : 3;
-
-        /**
-         * @brief Width of physical address used for the VMCS
-         *        - 0 -> limited to the available amount of physical RAM
-         *        - 1 -> within the first 4 GB
-         *
-         * [Bit 48] Indicates the width of the physical addresses that may be used for the VMXON region, each VMCS, and data
-         * structures referenced by pointers in a VMCS (I/O bitmaps, virtual-APIC page, MSR areas for VMX transitions). If the bit
-         * is 0, these addresses are limited to the processor's physical-address width.2 If the bit is 1, these addresses are
-         * limited to 32 bits. This bit is always 0 for processors that support Intel 64 architecture.
-         */
-        UINT64 VmcsPhysicalAddressWidth : 1;
-#define IA32_VMX_BASIC_VMCS_PHYSICAL_ADDRESS_WIDTH_BIT               48
-#define IA32_VMX_BASIC_VMCS_PHYSICAL_ADDRESS_WIDTH_FLAG              0x1000000000000
-#define IA32_VMX_BASIC_VMCS_PHYSICAL_ADDRESS_WIDTH_MASK              0x01
-#define IA32_VMX_BASIC_VMCS_PHYSICAL_ADDRESS_WIDTH(_)                (((_) >> 48) & 0x01)
-
-        /**
-         * @brief Whether the processor supports the dual-monitor treatment of system-management interrupts and system-management
-         *        code (always 1)
-         *
-         * [Bit 49] Read as 1, the logical processor supports the dual-monitor treatment of system-management interrupts and
-         * system-management mode.
-         *
-         * @see Vol3C[34.15(DUAL-MONITOR TREATMENT OF SMIs AND SMM)]
-         */
-        UINT64 DualMonitorSupport : 1;
-#define IA32_VMX_BASIC_DUAL_MONITOR_SUPPORT_BIT                      49
-#define IA32_VMX_BASIC_DUAL_MONITOR_SUPPORT_FLAG                     0x2000000000000
-#define IA32_VMX_BASIC_DUAL_MONITOR_SUPPORT_MASK                     0x01
-#define IA32_VMX_BASIC_DUAL_MONITOR_SUPPORT(_)                       (((_) >> 49) & 0x01)
-
-        /**
-         * @brief Memory type that must be used for the VMCS
-         *
-         * [Bits 53:50] Report the memory type that should be used for the VMCS, for data structures referenced by pointers in the
-         * VMCS (I/O bitmaps, virtual-APIC page, MSR areas for VMX transitions), and for the MSEG header. If software needs to
-         * access these data structures (e.g., to modify the contents of the MSR bitmaps), it can configure the paging structures
-         * to map them into the linear-address space. If it does so, it should establish mappings that use the memory type reported
-         * bits 53:50 in this MSR.
-         * As of this writing, all processors that support VMX operation indicate the write-back type.
-         */
-        UINT64 MemoryType : 4;
-#define IA32_VMX_BASIC_MEMORY_TYPE_BIT                               50
-#define IA32_VMX_BASIC_MEMORY_TYPE_FLAG                              0x3C000000000000
-#define IA32_VMX_BASIC_MEMORY_TYPE_MASK                              0x0F
-#define IA32_VMX_BASIC_MEMORY_TYPE(_)                                (((_) >> 50) & 0x0F)
-
-        /**
-         * @brief Whether the processor provides additional information for exits due to INS/OUTS
-         *
-         * [Bit 54] When set to 1, the processor reports information in the VM-exit instruction-information field on VM exits due
-         * to execution of the INS and OUTS instructions. This reporting is done only if this bit is read as 1.
-         *
-         * @see Vol3C[27.2.4(Information for VM Exits Due to Instruction Execution)]
-         */
-        UINT64 InsOutsReporting : 1;
-#define IA32_VMX_BASIC_INS_OUTS_REPORTING_BIT                        54
-#define IA32_VMX_BASIC_INS_OUTS_REPORTING_FLAG                       0x40000000000000
-#define IA32_VMX_BASIC_INS_OUTS_REPORTING_MASK                       0x01
-#define IA32_VMX_BASIC_INS_OUTS_REPORTING(_)                         (((_) >> 54) & 0x01)
-
-        /**
-         * @brief Whether default 1 bits in control MSRs (pin/proc/exit/entry) may be cleared to 0 and that 'true' control MSRs are
-         *        supported
-         *
-         * [Bit 55] Is read as 1 if any VMX controls that default to 1 may be cleared to 0. It also reports support for the VMX
-         * capability MSRs IA32_VMX_TRUE_PINBASED_CTLS, IA32_VMX_TRUE_PROCBASED_CTLS, IA32_VMX_TRUE_EXIT_CTLS, and
-         * IA32_VMX_TRUE_ENTRY_CTLS.
-         *
-         * @see Vol3D[A.2(RESERVED CONTROLS AND DEFAULT SETTINGS)]
-         * @see Vol3D[A.3.1(Pin-Based VM-Execution Controls)]
-         * @see Vol3D[A.3.2(Primary Processor-Based VM-Execution Controls)]
-         * @see Vol3D[A.4(VM-EXIT CONTROLS)]
-         * @see Vol3D[A.5(VM-ENTRY CONTROLS)]
-         */
-        UINT64 VmxControls : 1;
-#define IA32_VMX_BASIC_VMX_CONTROLS_BIT                              55
-#define IA32_VMX_BASIC_VMX_CONTROLS_FLAG                             0x80000000000000
-#define IA32_VMX_BASIC_VMX_CONTROLS_MASK                             0x01
-#define IA32_VMX_BASIC_VMX_CONTROLS(_)                               (((_) >> 55) & 0x01)
-        UINT64 Reserved2 : 8;
-    };
-
-    UINT64 AsUInt;
-} IA32_VMX_BASIC_REGISTER;
 typedef union
 {
     struct
